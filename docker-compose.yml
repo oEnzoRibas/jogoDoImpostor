@@ -1,0 +1,51 @@
+name: jdi
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    ports:
+      - "${BACKEND_PORT}:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    env_file:
+      - .env
+    environment:
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge

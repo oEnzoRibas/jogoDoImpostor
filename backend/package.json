@@ -1,0 +1,31 @@
+{
+  "name": "jogo-do-impostor-backend",
+  "version": "0.0.0",
+  "type": "module",
+  "keywords": [
+    "node",
+    "typescript",
+    "npm"
+  ],
+  "homepage": "https://github.com/oenzoribas/jogoDoImpostor",
+  "bugs": {
+    "url": "https://github.com/oenzoribas/jogoDoImpostor/issues"
+  },
+  "author": "Enzo Ribas",
+  "license": "SEE LICENSE IN LICENSE FILE",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "redis": "^5.10.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
