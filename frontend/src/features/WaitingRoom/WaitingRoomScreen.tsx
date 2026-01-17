@@ -3,7 +3,9 @@ import toast from "react-hot-toast";
 import { useGame } from "../../context/GameContext";
 import { socketService } from "../../services/socket";
 import { getAvailableThemes } from "@jdi/shared/src/themes";
-import { ThemeUploader } from "./ThemeUploader";
+import { ThemeUploader } from "./components/ThemeUploader";
+import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 // Temas Padrão
 const AVAILABLE_THEMES = getAvailableThemes();
@@ -18,61 +20,10 @@ const WaitingRoomScreen = () => {
   const [showThemeModal, setShowThemeModal] = useState(false);
 
   // EFFECTS
-  useEffect(() => {
-    const socket = socketService.socket;
-
-    if (!socket) {
-      console.error("Socket not found in WaitingRoomScreen");
-      return;
-    }
-
-    if (!socket.connected) {
-      console.warn(
-        "⚠️ WaitingRoom: Socket existe, mas está desconectado (id:",
-        socket.id,
-        ")",
-      );
-    } else {
-      console.log(
-        "✅ WaitingRoom: Socket conectado e pronto (id:",
-        socket.id,
-        ")",
-      );
-
-      const handleThemesUpdate = (newCustomThemes: string[]) => {
-        console.log("🔥 EVENTO RECEBIDO! Payload:", newCustomThemes);
-
-        if (!Array.isArray(newCustomThemes)) {
-          console.error(
-            "❌ Erro: Backend mandou algo que não é array:",
-            newCustomThemes,
-          );
-          return;
-        }
-
-        setAvailableThemes((prev) => {
-          const combined = Array.from(
-            new Set([...AVAILABLE_THEMES, ...newCustomThemes]),
-          );
-          console.log("🔄 Atualizando lista para:", combined);
-          return combined;
-        });
-
-        toast.success("Lista de temas atualizada!");
-
-        if (newCustomThemes.length > 0) {
-          setSelectedTheme(newCustomThemes[newCustomThemes.length - 1]);
-        }
-      };
-
-      socket.off("themes_updated");
-      socket.on("themes_updated", handleThemesUpdate);
-
-      return () => {
-        socket.off("themes_updated", handleThemesUpdate);
-      };
-    }
-  }, [socketService.socket]);
+  useSocketEvent<string[]>("themes_updated", (newThemes) => {
+    setAvailableThemes((prev) => [...prev, ...newThemes]);
+    toast.success("Novos temas!");
+  });
 
   const handleStartGame = () => {
     if (room && room.players.length < 2) {
@@ -84,27 +35,10 @@ const WaitingRoomScreen = () => {
 
   if (!room || !me) return <div>Carregando...</div>;
 
-  const copyToClipboard = async () => {
-    const textToCopy = room.id;
-    // ... (Lógica de copy mantida igual)
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      toast.success("Código copiado!");
-    } catch {
-      // Fallback simples
-      const textArea = document.createElement("textarea");
-      textArea.value = textToCopy;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      toast.success("Código copiado!");
-    }
-  };
+  const copyToClipboard = useCopyToClipboard();
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px", color: "white" }}>
-
       <p>Current Game State: {gameState}</p>
 
       {/* MODAL NO TOPO PARA EVITAR Z-INDEX BUG */}
@@ -126,7 +60,7 @@ const WaitingRoomScreen = () => {
       >
         <p style={{ margin: 0, fontSize: "14px", color: "#aaa" }}>CÓDIGO:</p>
         <h2
-          onClick={copyToClipboard}
+          onClick={() => copyToClipboard.copy(room.id)}
           style={{
             margin: "5px 0",
             fontSize: "40px",

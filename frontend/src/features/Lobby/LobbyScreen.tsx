@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useGame } from "../../context/GameContext"; // Ajuste o import conforme sua pasta
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 const LobbyScreen = () => {
   const { createRoom, joinRoom, gameState } = useGame();
 
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useLocalStorage("jdi_player_name", "");
   const [roomIdInput, setRoomIdInput] = useState("");
 
   const handleCreateRoom = () => {
