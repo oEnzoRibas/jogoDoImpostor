@@ -1,6 +1,8 @@
 {
   "name": "@jdi/shared",
+  "type": "module",
   "version": "1.0.0",
   "main": "src/types.ts",
-  "types": "src/types.ts"
+  "types": "src/types.ts",
+  "themes": "src/themes.ts"
 }

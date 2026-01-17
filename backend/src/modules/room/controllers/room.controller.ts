@@ -9,7 +9,7 @@ interface CreateRoomPayload {
 interface JoinRoomPayload {
   roomId: string;
   playerName: string;
-}
+} 
 
 interface StartGamePayload {
   theme: string;
@@ -91,7 +91,7 @@ export const registerRoomHandlers = (io: SocketIOServer, socket: Socket) => {
     }
   };
 
-  const uploadThemesHandler = async (payload: {
+  const addCustomThemesHandler = async (payload: {
     themes: Record<string, string[]>;
   }) => {
     try {
@@ -103,15 +103,18 @@ export const registerRoomHandlers = (io: SocketIOServer, socket: Socket) => {
         throw new Error("Player is not in any room");
       }
 
-      const newThemeNames = await RoomService.addCustomThemes(
+      const { themes } = payload;
+
+      const allCustomThemes = await RoomService.addCustomThemes(
         roomId,
-        payload.themes
+        socket.id,
+        themes,
       );
 
-      io.to(roomId).emit("custom_themes_updated", { themes: newThemeNames });
+      io.to(roomId).emit("themes_updated", allCustomThemes);
 
       console.log(
-        `Custom themes uploaded for Room ${roomId} by User ID: ${socket.id}`
+        `Custom themes uploaded for Room ${roomId} by User ID: ${socket.id}`,
       );
 
       socket.emit("toast", {
@@ -172,5 +175,5 @@ export const registerRoomHandlers = (io: SocketIOServer, socket: Socket) => {
   socket.on("leave_room", leaveRoomHandler);
   socket.on("disconnect", leaveRoomHandler);
   socket.on("start_game", startGameHandler);
-  socket.on("upload_custom_themes", uploadThemesHandler);
+  socket.on("upload_custom_themes", addCustomThemesHandler);
 };

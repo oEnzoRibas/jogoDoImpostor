@@ -1,38 +1,84 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useGame } from "../../context/GameContext";
-import { socketService } from "../../services/socket"; // Importar socket para ouvir temas novos
+import { socketService } from "../../services/socket";
+import { getAvailableThemes } from "@jdi/shared/src/themes";
+import { ThemeUploader } from "./ThemeUploader";
 
 // Temas Padrão
-const DEFAULT_THEMES = ["ANIMAIS", "PAISES", "COMIDA", "OBJETOS", "PROFISSOES"];
+const AVAILABLE_THEMES = getAvailableThemes();
 
 const WaitingRoomScreen = () => {
-  const { room, me, startGame, leaveRoom } = useGame();
+  const { room, me, startGame, leaveRoom, gameState } = useGame();
 
-  // 👇 ESTADO DO TEMA (Faltava isso!)
+  // STATES
   const [availableThemes, setAvailableThemes] =
-    useState<string[]>(DEFAULT_THEMES);
-  const [selectedTheme, setSelectedTheme] = useState(DEFAULT_THEMES[0]);
+    useState<string[]>(AVAILABLE_THEMES);
+  const [selectedTheme, setSelectedTheme] = useState(AVAILABLE_THEMES[0]);
+  const [showThemeModal, setShowThemeModal] = useState(false);
 
-  // Listener para novos temas (Upload)
+  // EFFECTS
   useEffect(() => {
-    socketService.socket?.on("themes_updated", (customThemeNames: string[]) => {
-      setAvailableThemes([...DEFAULT_THEMES, ...customThemeNames]);
-      toast.success("Novos temas adicionados!");
-      if (customThemeNames.length > 0) setSelectedTheme(customThemeNames[0]);
-    });
-    return () => {
-      socketService.socket?.off("themes_updated");
-    };
-  }, []);
+    const socket = socketService.socket;
+
+    if (!socket) {
+      console.error("Socket not found in WaitingRoomScreen");
+      return;
+    }
+
+    if (!socket.connected) {
+      console.warn(
+        "⚠️ WaitingRoom: Socket existe, mas está desconectado (id:",
+        socket.id,
+        ")",
+      );
+    } else {
+      console.log(
+        "✅ WaitingRoom: Socket conectado e pronto (id:",
+        socket.id,
+        ")",
+      );
+
+      const handleThemesUpdate = (newCustomThemes: string[]) => {
+        console.log("🔥 EVENTO RECEBIDO! Payload:", newCustomThemes);
+
+        if (!Array.isArray(newCustomThemes)) {
+          console.error(
+            "❌ Erro: Backend mandou algo que não é array:",
+            newCustomThemes,
+          );
+          return;
+        }
+
+        setAvailableThemes((prev) => {
+          const combined = Array.from(
+            new Set([...AVAILABLE_THEMES, ...newCustomThemes]),
+          );
+          console.log("🔄 Atualizando lista para:", combined);
+          return combined;
+        });
+
+        toast.success("Lista de temas atualizada!");
+
+        if (newCustomThemes.length > 0) {
+          setSelectedTheme(newCustomThemes[newCustomThemes.length - 1]);
+        }
+      };
+
+      socket.off("themes_updated");
+      socket.on("themes_updated", handleThemesUpdate);
+
+      return () => {
+        socket.off("themes_updated", handleThemesUpdate);
+      };
+    }
+  }, [socketService.socket]);
 
   const handleStartGame = () => {
     if (room && room.players.length < 2) {
-      // Mínimo de jogadores (ajuste se quiser 3)
       toast.error("É necessário pelo menos 2 jogadores para iniciar.");
       return;
     }
-    // 👇 Passa o tema selecionado
     startGame(selectedTheme);
   };
 
@@ -40,34 +86,32 @@ const WaitingRoomScreen = () => {
 
   const copyToClipboard = async () => {
     const textToCopy = room.id;
-    if (navigator.clipboard && window.isSecureContext) {
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        toast.success("Código copiado!");
-        return;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    // Fallback manual
-    const textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-9999px";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
+    // ... (Lógica de copy mantida igual)
     try {
-      document.execCommand("copy");
+      await navigator.clipboard.writeText(textToCopy);
       toast.success("Código copiado!");
-    } catch (err) {
-      toast.error("Copie manualmente: " + textToCopy);
+    } catch {
+      // Fallback simples
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast.success("Código copiado!");
     }
-    document.body.removeChild(textArea);
   };
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px", color: "white" }}>
+
+      <p>Current Game State: {gameState}</p>
+
+      {/* MODAL NO TOPO PARA EVITAR Z-INDEX BUG */}
+      {showThemeModal && (
+        <ThemeUploader onClose={() => setShowThemeModal(false)} />
+      )}
+
       <h1>Sala de Espera</h1>
 
       {/* CÓDIGO DA SALA */}
@@ -134,27 +178,51 @@ const WaitingRoomScreen = () => {
           gap: "15px",
         }}
       >
-        {/* SELETOR DE TEMA (Só aparece para o Host) */}
         {me?.isHost && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-            <label>Escolha o Tema:</label>
-            <select
-              value={selectedTheme}
-              onChange={(e) => setSelectedTheme(e.target.value)}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <label>Tema:</label>
+
+              {/* SELECT BLINDADO */}
+              <select
+                value={selectedTheme}
+                onChange={(e) => setSelectedTheme(e.target.value)}
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  minWidth: "200px",
+                  color: "black", // Garante contraste
+                }}
+              >
+                {availableThemes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => setShowThemeModal(true)}
               style={{
-                padding: "10px",
-                borderRadius: "5px",
-                fontSize: "16px",
-                minWidth: "200px",
+                background: "transparent",
+                border: "1px dashed #aaa",
+                color: "#ccc",
+                padding: "8px 16px",
+                cursor: "pointer",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
             >
-              {availableThemes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            {/* Aqui você pode por o componente <ThemeUploader /> se tiver criado */}
+              + Criar Tema Personalizado
+            </button>
           </div>
         )}
 
@@ -175,11 +243,11 @@ const WaitingRoomScreen = () => {
 
           {me?.isHost ? (
             <button
-              onClick={handleStartGame} // Usa a função handle que valida e envia o tema
+              onClick={handleStartGame}
               disabled={room.players.length < 2}
               style={{
                 padding: "10px 20px",
-                background: room.players.length < 2 ? "#555" : "#22c55e",
+                background: room.players.length < 2 ? "#868686" : "#22c55e",
                 color: "white",
                 border: "none",
                 borderRadius: "5px",
@@ -197,6 +265,6 @@ const WaitingRoomScreen = () => {
       </div>
     </div>
   );
-};
+};;
 
 export default WaitingRoomScreen;

@@ -18,6 +18,7 @@ export interface Room {
   id: string;
   players: Player[];
   gameState: GameState;
+  customThemes: string[];
 }
 
 export interface GameSettings {

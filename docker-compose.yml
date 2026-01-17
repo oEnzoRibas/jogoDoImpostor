@@ -7,7 +7,7 @@ services:
       target: dev
       dockerfile: backend/Dockerfile
     ports:
-      - "${BACKEND_PORT}:3000"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     env_file:
       - .env
     volumes:
@@ -31,7 +31,7 @@ services:
       target: dev
       dockerfile: frontend/Dockerfile
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     env_file:
       - .env
     environment:

@@ -3,7 +3,7 @@ import { createServer } from "http";
 import "dotenv/config";
 import { setupSocket } from "./socket.js";
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.BACKEND_PORT || 3000;
 const REDIS_URL = process.env.REDIS_URL || "redis://redis:6379";
 
 async function bootstrap() {

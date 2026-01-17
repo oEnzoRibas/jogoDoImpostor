@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { redisClient } from "../../../config/redis.js";
 import { Room, Player, GameState } from "@jdi/shared";
-import { getRandomWord, THEMES } from "../../../data/themes.js";
+import { getRandomWord, THEMES } from "@jdi/shared/src/themes.js";
 
 const ROOM_TTL = 60 * 60 * 2;
 const PLAYER_TTL = 60 * 60 * 24;
@@ -11,25 +11,11 @@ const KEY_PLAYER_ROOM = "player_room:";
 const KEY_CUSTOM_THEMES = "custom_themes:";
 
 export const RoomService = {
-  async addCustomThemes(roomId: string, customData: Record<string, string[]>) {
-    if (!roomId || !customData) throw new Error("Invalid parameters");
-
-    await redisClient.set(
-      `${KEY_CUSTOM_THEMES}${roomId}`,
-      JSON.stringify(customData),
-      { EX: ROOM_TTL }
-    );
-
-    return Object.keys(customData);
-  },
-
   getRoomIdByPlayer: async (playerId: string): Promise<string> => {
     const roomId = await redisClient.get(`${KEY_PLAYER_ROOM}${playerId}`);
-
     if (!roomId) {
       throw new Error("Player is not in any room");
     }
-
     return roomId;
   },
 
@@ -47,6 +33,7 @@ export const RoomService = {
       id: roomId,
       gameState: "WAITING" as GameState,
       players: [hostPlayer],
+      customThemes: [],
     };
 
     await redisClient.set(`${KEY_ROOM}${roomId}`, JSON.stringify(newRoom), {
@@ -62,7 +49,7 @@ export const RoomService = {
   async join(
     roomId: string,
     playerId: string,
-    playerName: string
+    playerName: string,
   ): Promise<Room> {
     const roomJson = await redisClient.get(`${KEY_ROOM}${roomId}`);
 
@@ -137,6 +124,7 @@ export const RoomService = {
 
     if (room.players.length === 0) {
       await redisClient.del(`${KEY_ROOM}${roomId}`);
+      await redisClient.del(`${KEY_CUSTOM_THEMES}${roomId}`);
       return null;
     }
 
@@ -189,10 +177,65 @@ export const RoomService = {
       isImpostor: index === impostorIndex,
     }));
 
+    room.gameState = "PLAYING";
+
     await redisClient.set(`${KEY_ROOM}${roomId}`, JSON.stringify(room), {
       EX: ROOM_TTL,
     });
 
     return { room, secretWord, impostorId };
+  },
+
+  async addCustomThemes(
+    roomId: string,
+    hostId: string,
+    customTheme: Record<string, string[]>,
+  ): Promise<string[]> {
+    const roomJson = await redisClient.get(`${KEY_ROOM}${roomId}`);
+    if (roomJson) {
+      const room: Room = JSON.parse(roomJson);
+      const player = room.players.find((p) => p.id === hostId);
+      if (!player?.isHost) {
+        throw new Error("Apenas o Host pode adicionar temas.");
+      }
+    }
+
+    const normalizedTheme = Object.keys(customTheme).reduce(
+      (acc, name) => {
+        const normalized = name.trim().toUpperCase();
+
+        if (THEMES[normalized]) {
+          throw new Error(
+            `O tema "${name}" conflita com um tema existente. Por favor, escolha outro nome.`,
+          );
+        }
+        acc[normalized] = customTheme[name];
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    );
+
+    if (Object.keys(normalizedTheme).length === 0) {
+      throw new Error("Nenhum tema personalizado fornecido.");
+    }
+
+    const existingJson = await redisClient.get(`${KEY_CUSTOM_THEMES}${roomId}`);
+    let existingThemes: Record<string, string[]> = {};
+    if (existingJson) {
+      existingThemes = JSON.parse(existingJson);
+    }
+
+    const updatedThemes = {
+      ...existingThemes,
+      ...normalizedTheme,
+    };
+
+    await redisClient.set(
+      `${KEY_CUSTOM_THEMES}${roomId}`,
+      JSON.stringify(updatedThemes),
+      { EX: ROOM_TTL },
+    );
+
+    return Object.keys(updatedThemes);
   },
 };

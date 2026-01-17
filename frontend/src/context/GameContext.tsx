@@ -129,8 +129,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setMySecret(null);
   };
 
-  // 👇 AQUI ESTÁ A CORREÇÃO PRINCIPAL
-  // Recebe o tema da tela e envia pro backend
   const startGame = (theme: string) => {
     if (!theme) {
       toast.error("Erro: Nenhum tema selecionado.");

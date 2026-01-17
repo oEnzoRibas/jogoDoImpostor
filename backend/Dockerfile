@@ -38,4 +38,4 @@ COPY --from=build /usr/src/app/backend/package.json ./backend/
 WORKDIR /usr/src/app/backend
 ENV NODE_ENV=production
 USER node
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist//backend/src/server.js"]

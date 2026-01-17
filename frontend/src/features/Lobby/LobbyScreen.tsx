@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGame } from "../../context/GameContext"; // Ajuste o import conforme sua pasta
 
 const LobbyScreen = () => {
-  const { createRoom, joinRoom } = useGame();
+  const { createRoom, joinRoom, gameState } = useGame();
 
   const [nickname, setNickname] = useState("");
   const [roomIdInput, setRoomIdInput] = useState("");
@@ -30,7 +30,7 @@ const LobbyScreen = () => {
   return (
     <div style={{ textAlign: "center", marginTop: "50px", color: "white" }}>
       <h1>Bem-vindo ao Impostor Game 🕵️</h1>
-
+      <p>Current Game State: {gameState}</p>
       <div
         style={{
           display: "flex",
