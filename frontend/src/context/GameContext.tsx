@@ -9,20 +9,25 @@ import toast from "react-hot-toast";
 import type { GameState, Room, Player } from "@jdi/shared/";
 import { socketService } from "../services/socket";
 
+interface SecretData {
+  role: string;
+  word: string;
+  theme: string;
+}
+
 interface GameContextData {
   gameState: GameState;
   room: Room | null;
   me: Player | null;
   isConnected: boolean;
-  
-  // Ações
+  mySecret: SecretData | null;
   connect: () => void;
   disconnect: () => void;
   createRoom: (playerName: string) => void;
   joinRoom: (roomId: string, playerName: string) => void;
   leaveRoom: () => void;
-  startGame: (theme: string) => void;
-  mySecret: { role: string; word: string; theme: string } | null;
+  startGame: (theme: string, maxRounds?: number) => void;
+  resetGame: () => void;
 }
 
 const GameContext = createContext({} as GameContextData);
@@ -32,11 +37,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [me, setMe] = useState<Player | null>(null);
-  
-  // Estado para guardar o segredo recebido do backend
-  const [mySecret, setMySecret] = useState<{ role: string; word: string; theme: string } | null>(null);
+  const [mySecret, setMySecret] = useState<SecretData | null>(null);
 
   useEffect(() => {
+    // Conecta assim que abre o site
     const socket = socketService.connect();
 
     const handleConnect = () => {
@@ -54,13 +58,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
 
     const handleRoomUpdate = (updatedRoom: Room) => {
-      // 🛡️ Segurança: Se eu não estou na lista, fui kickado ou saí
+      // Verifica se estou na sala
       const amIInTheRoom = updatedRoom.players.some((p) => p.id === socket.id);
 
       if (!amIInTheRoom) {
         setRoom(null);
         setGameState("LOBBY");
         setMe(null);
+        setMySecret(null);
         return;
       }
 
@@ -69,10 +74,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       const myPlayer = updatedRoom.players.find((p) => p.id === socket.id);
       setMe(myPlayer || null);
+
+      // Limpa segredo se voltar pro Lobby
+      if (updatedRoom.gameState === "WAITING") {
+        setMySecret(null);
+      }
     };
 
-    // 👇 OUVINTE DO SEGREDO (INÍCIO DO JOGO)
-    const handleGameStart = (secretData: any) => {
+    const handleGameStart = (secretData: SecretData) => {
       console.log("🤫 Segredo recebido:", secretData);
       setMySecret(secretData);
       toast("O Jogo Começou!", { icon: "🎮" });
@@ -86,7 +95,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       socket.on("connect", handleConnect);
       socket.on("disconnect", handleDisconnect);
       socket.on("room_update", handleRoomUpdate);
-      socket.on("game_start", handleGameStart); // Registra o ouvinte
+      socket.on("game_start", handleGameStart);
       socket.on("room:error", handleError);
     }
 
@@ -109,8 +118,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const disconnect = () => {
     socketService.disconnect();
-    setGameState("LOBBY");
-    setRoom(null);
   };
 
   const createRoom = (playerName: string) => {
@@ -129,13 +136,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setMySecret(null);
   };
 
-  const startGame = (theme: string) => {
-    if (!theme) {
-      toast.error("Erro: Nenhum tema selecionado.");
-      return;
-    }
-    console.log("🚀 Iniciando jogo com tema:", theme);
-    socketService.socket?.emit("start_game", { theme });
+  const startGame = (theme: string, maxRounds?: number) => {
+    socketService.socket?.emit("start_game", { theme, maxRounds });
+  };
+
+  const resetGame = () => {
+    socketService.socket?.emit("reset_game");
   };
 
   return (
@@ -145,14 +151,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         room,
         me,
         isConnected,
-        mySecret, // Exposto para a tela do jogo usar depois
+        mySecret,
         connect,
         disconnect,
         createRoom,
         joinRoom,
         leaveRoom,
-        startGame, 
-        // Removi chooseTheme pois é melhor controlar isso localmente no componente
+        startGame,
+        resetGame,
       }}
     >
       {children}

@@ -12,6 +12,9 @@ export interface Player {
   name: string;
   isHost: boolean;
   isImpostor: boolean;
+  lastWord?: string;
+  wordsList?: string[];
+  hasVoted?: boolean;
 }
 
 export interface Room {
@@ -19,12 +22,13 @@ export interface Room {
   players: Player[];
   gameState: GameState;
   customThemes: string[];
+  currentRound: number;
+  maxRounds: number;
+  turnPlayerId?: string;
+  gameResults?: GameResults;
+  votes?: Record<string, string>; // playerId -> votedPlayerId
 }
 
-export interface GameSettings {
-  theme: string;
-  roundTime: number;
-}
 
 export interface GameResults {
   winner: "IMPOSTOR" | "CREWMATES";

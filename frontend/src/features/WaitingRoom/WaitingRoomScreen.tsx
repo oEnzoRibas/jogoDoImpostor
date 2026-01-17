@@ -7,6 +7,7 @@ import { ThemeUploader } from "./components/ThemeUploader";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { DEFAULT_MAX_ROUNDS } from "@jdi/shared/src/constants";
 
 // Temas Padrão
 const AVAILABLE_THEMES = getAvailableThemes();
@@ -21,6 +22,10 @@ const WaitingRoomScreen = () => {
     useState<string[]>(AVAILABLE_THEMES);
   const [selectedTheme, setSelectedTheme] = useState(AVAILABLE_THEMES[0]);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [preferredMaxRounds, setPreferredMaxRounds] = useLocalStorage(
+    "jdi_preferred_max_rounds",
+    DEFAULT_MAX_ROUNDS,
+  );
 
   // EFFECTS
   useSocketEvent<string[]>("themes_updated", (newThemes) => {
@@ -44,7 +49,7 @@ const WaitingRoomScreen = () => {
       toast.error("É necessário pelo menos 2 jogadores para iniciar.");
       return;
     }
-    startGame(selectedTheme);
+    startGame(selectedTheme, preferredMaxRounds);
   };
 
   const copyToClipboard = useCopyToClipboard();
@@ -135,8 +140,6 @@ const WaitingRoomScreen = () => {
           >
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <label>Tema:</label>
-
-              {/* SELECT BLINDADO */}
               <select
                 value={selectedTheme}
                 onChange={(e) => setSelectedTheme(e.target.value)}
@@ -153,6 +156,27 @@ const WaitingRoomScreen = () => {
                   </option>
                 ))}
               </select>
+            </div>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <label>Máximo de Rodadas:</label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={preferredMaxRounds}
+                onChange={(e) =>
+                  setPreferredMaxRounds(
+                    Math.max(1, Math.min(10, Number(e.target.value))),
+                  )
+                }
+                style={{
+                  width: "60px",
+                  padding: "10px",
+                  borderRadius: "5px",
+                  textAlign: "center",
+                  color: "black",
+                }}
+              />
             </div>
 
             <button

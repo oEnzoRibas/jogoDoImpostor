@@ -9,6 +9,7 @@ import WaitingRoomScreen from "./features/WaitingRoom/WaitingRoomScreen";
 import GameScreen from "./features/Game/GameScreen";
 import ResultsScreen from "./features/Results/ResultsScreen";
 import { Toaster } from "react-hot-toast";
+import VotingScreen from "./features/Voting/VotingScreen";
 
 const socket = io(import.meta.env.VITE_BACKEND_URL, {
   autoConnect: false,
@@ -29,8 +30,10 @@ function GameManager() {
       return <WaitingRoomScreen />;
 
     case "PLAYING":
-    case "VOTING":
       return <GameScreen />;
+
+    case "VOTING":
+      return <VotingScreen />;
 
     case "RESULTS":
       return <ResultsScreen />;
