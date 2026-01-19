@@ -1,4 +1,4 @@
-import { PrimaryButton } from "../../../../components/Buttons/PrimaryButton";
+import { PrimaryButton } from "../../../../../components/Buttons/PrimaryButton";
 
 interface Props {
   onClick: () => void;
@@ -40,7 +40,7 @@ const StartVotingButton = ({ onClick }: Props) => {
             onClick={onClick}
             fullWidth
             style={{
-              boxShadow: "0 0 20px #ff0000",
+              boxShadow: "0 0 20px #05ff82",
               animation: "pulse 2s infinite",
             }}
           >

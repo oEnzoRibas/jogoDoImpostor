@@ -9,7 +9,10 @@ import { Card } from "../../components/Card/Card";
 import { PrimaryButton } from "../../components/Buttons/PrimaryButton";
 import { Input } from "../../components/Input/Input";
 import { theme } from "../../styles/theme";
-import StartVotingButton from "./components/StartVotingButton.tsx/StartVotingButton";
+import StartVotingButton from "./components/VotingSection.tsx/StartVotingButton.tsx/StartVotingButton";
+import SendWordInput from "./components/SendWordInput.tsx/SendWordInput";
+import WordsBalloon from "./components/Words/WordsBalloon";
+import Avatar from "./components/Avatar/Avatar";
 
 const GameScreen = () => {
   const { room, me, mySecret } = useGame();
@@ -188,7 +191,7 @@ const GameScreen = () => {
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
-          gap: theme.spacing.l,
+          gap: theme.spacing.xl,
           paddingBottom: "120px",
         }}
       >
@@ -209,121 +212,23 @@ const GameScreen = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                gap: "8px",
               }}
             >
-              {/* SPEECH BALLOON */}
               {hasWords && (
-                <div
-                  onMouseEnter={() => setHoveredPlayerId(player.id)}
-                  onMouseLeave={() => setHoveredPlayerId(null)}
-                  onClick={() =>
-                    setHoveredPlayerId(isHovered ? null : player.id)
-                  } // Works on touch too
-                  style={{
-                    position: "absolute",
-                    bottom: "100%",
-                    marginBottom: "10px",
-                    background: "white",
-                    color: "#000",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-                    zIndex: 10,
-                    cursor: "pointer",
-                    minWidth: "60px",
-                    textAlign: "center",
-                    border: `2px solid ${player.id === me.id ? theme.colors.primary : "#fff"}`,
-                  }}
-                >
-                  {isHovered ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "2px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          color: "#888",
-                          borderBottom: "1px solid #eee",
-                        }}
-                      >
-                        HISTORY
-                      </span>
-                      {safeWordsList.map((w, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            color:
-                              i === safeWordsList.length - 1 ? "#000" : "#666",
-                          }}
-                        >
-                          {w}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    lastWord
-                  )}
-                  {/* Triângulo do balão */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "-6px",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "6px solid transparent",
-                      borderRight: "6px solid transparent",
-                      borderTop: "6px solid white",
-                    }}
-                  />
-                </div>
+                <WordsBalloon
+                  player={player}
+                  me={me}
+                  wordsList={safeWordsList}
+                  lastWord={lastWord}
+                  isHovered={isHovered}
+                  theme={theme}
+                  setHoveredPlayerId={setHoveredPlayerId}
+                />
               )}
 
               {/* AVATAR */}
-              <div
-                style={{
-                  width: "70px",
-                  height: "70px",
-                  borderRadius: "50%",
-                  background: theme.colors.surface,
-                  border: isPlayerTurn
-                    ? `3px solid ${theme.colors.accent}` // Amarelo se for a vez dele
-                    : player.id === me.id
-                      ? `3px solid ${theme.colors.primary}`
-                      : `3px solid transparent`, // Verde se sou eu
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "28px",
-                  fontWeight: "bold",
-                  boxShadow: isPlayerTurn
-                    ? `0 0 15px ${theme.colors.accent}60`
-                    : "none",
-                  transition: "all 0.3s",
-                }}
-              >
-                {player.name.charAt(0).toUpperCase()}
-              </div>
-
-              <span
-                style={{
-                  marginTop: "8px",
-                  fontSize: theme.fontSize.s,
-                  fontWeight: "bold",
-                  color: isPlayerTurn
-                    ? theme.colors.accent
-                    : theme.colors.text.primary,
-                }}
-              >
-                {player.name}
-              </span>
+              <Avatar player={player} me={me} isPlayerTurn={isPlayerTurn} />
             </div>
           );
         })}
@@ -331,53 +236,12 @@ const GameScreen = () => {
 
       {/* --- DOCK DE INPUT (Fixo embaixo) --- */}
       {isMyTurn && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: 0,
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            padding: "0 20px",
-            boxSizing: "border-box",
-            zIndex: 100,
-          }}
-        >
-          <Card
-            style={{
-              width: "100%",
-              maxWidth: "500px",
-              flexDirection: "row",
-              display: "flex",
-              gap: "10px",
-              alignItems: "center",
-              padding: "10px",
-              borderRadius: "16px",
-              boxShadow: "0 -5px 30px rgba(0,0,0,0.5)",
-              border: `1px solid ${theme.colors.accent}`,
-            }}
-          >
-            <form
-              onSubmit={handleSubmit}
-              style={{ display: "flex", width: "100%", gap: "10px" }}
-            >
-              <Input
-                placeholder="Escreva uma dica..."
-                value={wordInput}
-                onChange={(e) => setWordInput(e.target.value)}
-                autoFocus
-                style={{ marginBottom: 0, flex: 1 }} // Remove margem padrão e expande
-              />
-              <PrimaryButton type="submit" style={{ padding: "0 20px" }}>
-                SEND
-              </PrimaryButton>
-            </form>
-          </Card>
-        </div>
+        <SendWordInput
+          wordInput={wordInput}
+          setWordInput={setWordInput}
+          handleSubmit={handleSubmit}
+        />
       )}
-
-      {/* ... rest of the game screen ... */}
 
       {/* If the game ended the rounds, show message for the common players */}
       {!room?.turnPlayerId && !me?.isHost && (
