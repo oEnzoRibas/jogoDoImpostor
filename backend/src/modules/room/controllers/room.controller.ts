@@ -4,7 +4,7 @@ import { Player } from "@jdi/shared";
 import { DEFAULT_MAX_ROUNDS } from "@jdi/shared/src/constants.js";
 import { CreateRoomPayload } from "../payloads/CreateRoomPayload.js";
 import { JoinRoomPayload } from "../payloads/JoinRoomPayload.js";
-import { StartGamePayload } from "../payloads/StartGamePayload.js";
+import { StartGamePayload } from "../../game/payloads/StartGamePayload.js";
 
 export const RoomController = {
   async createRoom(

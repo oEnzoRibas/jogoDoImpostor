@@ -39,6 +39,10 @@ export const setupSocket = (httpServer: HttpServer) => {
     socket.on("submit_vote", (payload) =>
       GameController.submitVote(io, socket, payload),
     );
+
+    socket.on("start_voting", (payload) =>
+      GameController.startVoting(io, socket, payload),
+    );
   });
 
   return io;

@@ -1,6 +1,6 @@
 export type GameState =
+  | "HOME"
   | "LOBBY"
-  | "WAITING"
   | "ROULETTE"
   | "PLAYING"
   | "VOTING"
@@ -32,9 +32,14 @@ export interface Room {
   votes?: Record<string, string>; // playerId -> votedPlayerId
 }
 
-
 export interface GameResults {
   winner: "IMPOSTOR" | "CREWMATES";
   impostorId: string;
   votes: Record<string, string>; // playerId -> votedPlayerId
+}
+
+export interface Theme {
+  name: string;
+  words: string[];
+  icon?: string;
 }

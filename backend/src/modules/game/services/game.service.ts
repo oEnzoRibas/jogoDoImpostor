@@ -18,22 +18,28 @@ export const GameService = {
 
     const room: Room = JSON.parse(roomJson);
 
-    let theme = THEMES[themeName];
+    const standardThemeObj = THEMES.find((t) => t.name === themeName);
 
-    if (!theme) {
+    let words: string[] | undefined = standardThemeObj?.words;
+
+    if (!words) {
       const customJson = await redisClient.get(`${KEY_CUSTOM_THEMES}${roomId}`);
 
       if (customJson) {
         const customThemes = JSON.parse(customJson);
-        theme = customThemes[themeName];
+        words = customThemes[themeName];
       }
     }
 
-    if (!theme || theme.length === 0) {
-      throw new Error("Theme not found or has no words");
+    if (!words) {
+      throw new Error(`Theme '${themeName}' not found`);
     }
 
-    const secretWord = theme[Math.floor(Math.random() * theme.length)];
+    if (words.length === 0) {
+      throw new Error("Theme has no words");
+    }
+
+    const secretWord = words[Math.floor(Math.random() * words.length)];
 
     const impostorIndex = Math.floor(Math.random() * room.players.length);
     const impostorId = room.players[impostorIndex].id;
@@ -158,11 +164,33 @@ export const GameService = {
     }
 
     if (room.currentRound > room.maxRounds) {
-      room.gameState = "VOTING";
       room.turnPlayerId = undefined;
     } else {
       room.turnPlayerId = room.players[nextIndex].id;
     }
+
+    await RoomService.saveRoom(room);
+    return room;
+  },
+
+  async startVoting(roomId: string, playerId: string): Promise<Room> {
+    const room = await RoomService.getRoom(roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    const player = room.players.find((p) => p.id === playerId);
+    if (!player?.isHost) {
+      throw new Error("Only host can start voting");
+    }
+
+    room.gameState = "VOTING";
+    room.turnPlayerId = undefined;
+
+    room.votes = {};
+    room.players.forEach((p) => {
+      p.hasVoted = false;
+    });
 
     await RoomService.saveRoom(room);
     return room;

@@ -1,4 +1,4 @@
 export interface StartGamePayload {
-  theme: string;
+  themeName: string;
   maxRounds?: number;
 }

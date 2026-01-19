@@ -32,7 +32,7 @@ export const RoomService = {
 
     const newRoom: Room = {
       id: roomId,
-      gameState: "WAITING" as GameState,
+      gameState: "LOBBY" as GameState,
       players: [hostPlayer],
       customThemes: [],
       currentRound: 0,
@@ -63,7 +63,7 @@ export const RoomService = {
     const room: Room = JSON.parse(roomJson);
 
     // Bloqueia entrada se o jogo já começou (opcional, mas recomendado)
-    if (room.gameState !== "LOBBY" && room.gameState !== "WAITING") {
+    if (room.gameState !== "HOME" && room.gameState !== "LOBBY") {
       throw new Error("O jogo já começou! Espere a próxima rodada.");
     }
 
@@ -99,7 +99,7 @@ export const RoomService = {
 
     const room: Room = JSON.parse(roomJson);
 
-    room.gameState = "WAITING";
+    room.gameState = "LOBBY";
     room.currentRound = 0;
     room.turnPlayerId = undefined;
     room.gameResults = undefined;
@@ -164,7 +164,7 @@ export const RoomService = {
     if (room.gameState === "PLAYING") {
       // C1: Poucos jogadores -> Encerra
       if (room.players.length < 2) {
-        room.gameState = "LOBBY";
+        room.gameState = "HOME";
         room.turnPlayerId = "";
         room.gameResults = undefined;
         room.currentRound = 0;
