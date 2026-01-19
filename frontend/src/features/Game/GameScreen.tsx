@@ -104,9 +104,18 @@ const GameScreen = () => {
                         fontSize: theme.fontSize.l,
                         fontWeight: "bold",
                         color: "#fff",
+                        display: "block",
                       }}
                     >
                       YOU ARE THE IMPOSTOR
+                    </span>
+                    <span
+                      style={{
+                        fontSize: theme.fontSize.s,
+                        color: "rgba(255,255,255,0.9)",
+                      }}
+                    >
+                      Theme: {mySecret?.theme}
                     </span>
                   </>
                 ) : (

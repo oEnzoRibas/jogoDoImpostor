@@ -15,7 +15,7 @@ interface Props {
 }
 const Avatar = ({ player, me, isPlayerTurn }: Props) => {
   return (
-    <div>
+    <div style={{ textAlign: "center" }}>
       <div
         style={{
           width: "70px",
@@ -51,38 +51,14 @@ const Avatar = ({ player, me, isPlayerTurn }: Props) => {
           }}
         >
           {player.name.charAt(0).toUpperCase()}
-
-          {player.isHost?.valueOf() && (
-            <span
-              style={{
-                position: "absolute",
-                bottom: "-5px",
-                right: "-5px",
-                background: theme.colors.primary,
-                color: "#fff",
-                borderRadius: "50%",
-                width: "20px",
-                height: "20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "12px",
-                fontWeight: "bold",
-                boxShadow: `0 0 5px ${theme.colors.primary}60`,
-              }}
-              title="Host"
-            >
-              👑
-            </span>
-          )}
         </div>
       </div>
-
       <span
         style={{
           marginTop: "8px",
           fontSize: theme.fontSize.s,
           fontWeight: "bold",
+          textAlign: "center",
           color: isPlayerTurn ? theme.colors.accent : theme.colors.text.primary,
         }}
       >
