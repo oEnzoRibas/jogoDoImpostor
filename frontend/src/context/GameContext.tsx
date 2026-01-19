@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
-import type { GameState, Room, Player } from "@jdi/shared/";
+import type { GameState, Room, Player, Theme } from "@jdi/shared/";
 import { socketService } from "../services/socket";
 
 interface SecretData {
@@ -26,32 +26,32 @@ interface GameContextData {
   createRoom: (playerName: string) => void;
   joinRoom: (roomId: string, playerName: string) => void;
   leaveRoom: () => void;
-  startGame: (theme: string, maxRounds?: number) => void;
+  startGame: (themeName: string, maxRounds?: number) => void;
   resetGame: () => void;
 }
 
 const GameContext = createContext({} as GameContextData);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameState, setGameState] = useState<GameState>("LOBBY");
+  const [gameState, setGameState] = useState<GameState>("HOME");
   const [room, setRoom] = useState<Room | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [me, setMe] = useState<Player | null>(null);
   const [mySecret, setMySecret] = useState<SecretData | null>(null);
 
   useEffect(() => {
-    // Conecta assim que abre o site
+    // Connect as soon as the site opens
     const socket = socketService.connect();
 
     const handleConnect = () => {
-      console.log("✅ Conectado!", socket?.id);
+      console.log("✅ Connected!", socket?.id);
       setIsConnected(true);
     };
 
     const handleDisconnect = () => {
-      console.log("❌ Desconectado");
+      console.log("❌ Disconnected");
       setIsConnected(false);
-      setGameState("LOBBY");
+      setGameState("HOME");
       setRoom(null);
       setMe(null);
       setMySecret(null);
@@ -63,7 +63,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       if (!amIInTheRoom) {
         setRoom(null);
-        setGameState("LOBBY");
+        setGameState("HOME");
         setMe(null);
         setMySecret(null);
         return;
@@ -76,15 +76,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setMe(myPlayer || null);
 
       // Limpa segredo se voltar pro Lobby
-      if (updatedRoom.gameState === "WAITING") {
+      if (updatedRoom.gameState === "LOBBY") {
         setMySecret(null);
       }
     };
 
     const handleGameStart = (secretData: SecretData) => {
-      console.log("🤫 Segredo recebido:", secretData);
+      console.log("🤫 Secret Received:", secretData);
       setMySecret(secretData);
-      toast("O Jogo Começou!", { icon: "🎮" });
+      toast("The Game Has Started!", { icon: "🎮" });
     };
 
     const handleError = (error: { message: string }) => {
@@ -131,13 +131,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const leaveRoom = () => {
     socketService.socket?.emit("leave_room");
     setRoom(null);
-    setGameState("LOBBY");
+    setGameState("HOME");
     setMe(null);
     setMySecret(null);
   };
 
-  const startGame = (theme: string, maxRounds?: number) => {
-    socketService.socket?.emit("start_game", { theme, maxRounds });
+  const startGame = (themeSelectedName: string, maxRounds?: number) => {
+    
+    const payload = {
+      themeName: themeSelectedName,
+      maxRounds: maxRounds 
+    };
+
+    console.log("🚀 Starting Game with payload:", payload);
+    socketService.socket?.emit("start_game", payload);
   };
 
   const resetGame = () => {
