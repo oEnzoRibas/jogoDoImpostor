@@ -15,6 +15,7 @@ export interface Player {
   lastWord?: string;
   wordsList?: string[];
   hasVoted?: boolean;
+  secretWord?: string;
 }
 
 export interface Room {
@@ -35,7 +36,8 @@ export interface Room {
 export interface GameResults {
   winner: "IMPOSTOR" | "CREWMATES";
   impostorId: string;
-  votes: Record<string, string>; // playerId -> votedPlayerId
+  votes: Record<string, string>; // playerId -> votedPlayerId~
+  word: string;
 }
 
 export interface Theme {

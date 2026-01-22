@@ -7,6 +7,8 @@ import { Card } from "../../components/Card/Card";
 import { PrimaryButton } from "../../components/Buttons/PrimaryButton";
 import { theme } from "../../styles/theme";
 import VotingResultsCard from "./VotingResultsCard/VotingResultsCard";
+import WinnerText from "./WinnerText/WinnerText";
+import MatchDetailsBox from "./MatchDetailsBox/MatchDetailsBox";
 
 const ResultsScreen = () => {
   const { room, me, resetGame, leaveRoom } = useGame();
@@ -47,85 +49,18 @@ const ResultsScreen = () => {
         }}
       />
 
-      <div style={{ textAlign: "center", marginBottom: theme.spacing.l }}>
-        <div
-          style={{
-            fontSize: "4rem",
-            marginBottom: "10px",
-            animation: "bounce 1s",
-          }}
-        >
-          {impostorWon ? "😈" : "🕵️‍♂️"}
-        </div>
-        <style>{`@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }`}</style>
+      <WinnerText
+        impostorWon={impostorWon}
+        iWon={iWon}
+        resultColor={resultColor}
+      ></WinnerText>
 
-        <h1
-          style={{
-            fontSize: "2.5rem",
-            margin: 0,
-            color: resultColor,
-            textTransform: "uppercase",
-            textShadow: `0 0 20px ${resultColor}60`,
-          }}
-        >
-          {impostorWon ? "IMPOSTOR VICTORY" : "THE INNOCENTS WON"}
-        </h1>
+      {/* Impostor Name and Word Cards*/}
 
-        <h2
-          style={{
-            marginTop: theme.spacing.s,
-            color: iWon
-              ? theme.colors.text.primary
-              : theme.colors.text.secondary,
-            fontSize: theme.fontSize.l,
-          }}
-        >
-          {iWon ? "🏆 YOU WON" : "☠️ YOU LOST..."}
-        </h2>
-      </div>
-
-      <Card
-        style={{
-          textAlign: "center",
-          border: `1px solid ${theme.colors.border}`,
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: theme.colors.text.secondary,
-            fontSize: theme.fontSize.s,
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-          }}
-        >
-          THE IMPOSTOR WAS
-        </p>
-        <div
-          style={{
-            fontSize: "2rem",
-            fontWeight: "bold",
-            color: theme.colors.text.primary,
-            marginTop: theme.spacing.s,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-          }}
-        >
-          <span
-            style={{
-              background: theme.colors.secondary,
-              color: "#fff",
-              padding: "5px 15px",
-              borderRadius: "8px",
-              fontSize: "1.5rem",
-            }}
-          >
-            {impostorName}
-          </span>
-        </div>
-      </Card>
+      <MatchDetailsBox
+        impostorName={impostorName}
+        word={room.gameResults.word}
+      ></MatchDetailsBox>
 
       <VotingResultsCard
         room={room}

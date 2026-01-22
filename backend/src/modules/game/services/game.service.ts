@@ -47,6 +47,8 @@ export const GameService = {
     room.players = room.players.map((p, index) => ({
       ...p,
       isImpostor: index === impostorIndex,
+      secretWord:
+        index === impostorIndex ? "You are the Impostor!" : secretWord,
     }));
 
     room.gameState = "PLAYING";
@@ -113,6 +115,9 @@ export const GameService = {
 
     let crewmatesWon = mostVotedId === impostor?.id;
 
+    const civilian = room.players.find((p) => !p.isImpostor);
+    const finalWord = civilian?.secretWord || "Unknown";
+
     if (
       Object.values(voteCounts).filter((count) => count === maxVotes).length > 1
     ) {
@@ -123,6 +128,7 @@ export const GameService = {
       winner: crewmatesWon ? "CREWMATES" : "IMPOSTOR",
       impostorId: impostor?.id || "",
       votes: room.votes || {},
+      word: finalWord,
     };
 
     await RoomService.saveRoom(room);
