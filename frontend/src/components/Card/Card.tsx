@@ -10,18 +10,17 @@ export const Card = ({ children, style }: CardProps) => {
   return (
     <div
       style={{
-        backgroundColor: theme.colors.surface, // #1e1e1e
-        borderRadius: theme.borderRadius.l, // 16px
-        padding: theme.spacing.l, // 24px
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius.l,
+        padding: theme.spacing.l,
         boxShadow: theme.shadows.card,
         color: theme.colors.text.primary,
-        border: `1px solid ${theme.colors.border}`, // Borda sutil para definição
+        border: `1px solid ${theme.colors.border}`,
         position: "relative",
-        overflow: "hidden", // Garante que nada vaze do card
+        overflow: "hidden",
         ...style,
       }}
     >
-      {/* Detalhe visual opcional: Uma borda fina colorida no topo */}
       <div
         style={{
           position: "absolute",

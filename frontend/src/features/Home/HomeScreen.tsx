@@ -19,18 +19,17 @@ const HomeScreen = () => {
     if (nickname.trim() !== "") {
       createRoom(nickname);
     } else {
-      // Dica: Use o toast aqui no futuro em vez de alert
-      alert("Por favor, digite um nickname!");
+      alert("Please enter a nickname!");
     }
   };
 
   const handleJoinRoom = () => {
     if (nickname.trim() === "") {
-      alert("Por favor, digite um nickname!");
+      alert("Please enter a nickname!");
       return;
     }
     if (roomIdInput.trim() === "") {
-      alert("Por favor, digite o ID da sala!");
+      alert("Please enter the room ID!");
       return;
     }
     joinRoom(roomIdInput.toUpperCase(), nickname);
@@ -38,7 +37,7 @@ const HomeScreen = () => {
 
   return (
     <PageContainer>
-      {/* Título e Logo */}
+      {/* Title and Logo */}
       <div
         style={{
           textAlign: "center",
@@ -63,7 +62,7 @@ const HomeScreen = () => {
 
       {/* Central Action Card */}
       <Card style={{ maxWidth: "400px", width: "100%", margin: "0 auto" }}>
-        {/* Input de Nome (Global) */}
+        {/* Global Name Input */}
         <div style={{ marginBottom: theme.spacing.l }}>
           <label
             style={{
@@ -77,13 +76,13 @@ const HomeScreen = () => {
           </label>
           <Input
             type="text"
-            placeholder="Ex: Detetive Silva"
+            placeholder="Ex: Detective Silva"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
           />
         </div>
 
-        {/* Botão de Criar */}
+        {/* Create Button */}
         <PrimaryButton
           variant="primary"
           fullWidth
@@ -93,7 +92,7 @@ const HomeScreen = () => {
           CREATE NEW ROOM 🎮
         </PrimaryButton>
 
-        {/* Divisor Visual */}
+        {/* Visual Divider */}
         <div
           style={{
             display: "flex",
@@ -113,7 +112,7 @@ const HomeScreen = () => {
           ></div>
         </div>
 
-        {/* Área de Join */}
+        {/* Join Area */}
         <div style={{ display: "flex", gap: theme.spacing.s }}>
           <Input
             type="text"
@@ -127,7 +126,7 @@ const HomeScreen = () => {
               textAlign: "center",
               letterSpacing: "2px",
               fontWeight: "bold",
-              width: "200px", // Fixed to fit the code
+              width: "200px",
             }}
           />
           <PrimaryButton variant="secondary" fullWidth onClick={handleJoinRoom}>

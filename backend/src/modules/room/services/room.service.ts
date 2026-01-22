@@ -1,10 +1,15 @@
 import { randomUUID } from "crypto";
 import { redisClient } from "../../../config/redis.js";
 import { Room, Player, GameState } from "@jdi/shared";
-import { getRandomWord, THEMES } from "@jdi/shared/src/themes.js";
-import { DEFAULT_MAX_ROUNDS, KEY_CUSTOM_THEMES, KEY_PLAYER_ROOM, KEY_ROOM, PLAYER_TTL, ROOM_TTL } from "@jdi/shared/src/constants.js";
-import { lstat } from "fs";
-import { callbackify } from "util";
+import { THEMES } from "@jdi/shared/src/themes.js";
+import {
+  DEFAULT_MAX_ROUNDS,
+  KEY_CUSTOM_THEMES,
+  KEY_PLAYER_ROOM,
+  KEY_ROOM,
+  PLAYER_TTL,
+  ROOM_TTL,
+} from "@jdi/shared/src/constants.js";
 
 
 interface RoomInternal extends Room {
@@ -62,16 +67,14 @@ export const RoomService = {
 
     const room: Room = JSON.parse(roomJson);
 
-    // Bloqueia entrada se o jogo já começou (opcional, mas recomendado)
     if (room.gameState !== "HOME" && room.gameState !== "LOBBY") {
       throw new Error("O jogo já começou! Espere a próxima rodada.");
     }
 
-    // Cria o jogador novo com o Socket ID atual
     const newPlayer: Player = {
       id: playerId,
       name: playerName,
-      isHost: room.players.length === 0, // Se for o primeiro, é Host
+      isHost: room.players.length === 0, 
       isImpostor: false,
       hasVoted: false,
       wordsList: [],
@@ -79,12 +82,10 @@ export const RoomService = {
 
     room.players.push(newPlayer);
 
-    // Salva o mapeamento Socket -> Sala
     await redisClient.set(`${KEY_PLAYER_ROOM}${playerId}`, roomId, {
       EX: PLAYER_TTL,
     });
 
-    // Salva a sala
     await this.saveRoom(room);
 
     return room;
@@ -127,7 +128,6 @@ export const RoomService = {
   },
 
   async leaveRoom(socketId: string): Promise<Room | null> {
-    // 1. Acha a sala
     const roomId = await this.getRoomIdByPlayer(socketId);
     if (!roomId) return null;
 
@@ -135,54 +135,38 @@ export const RoomService = {
     if (!roomStr) return null;
     const room: Room = JSON.parse(roomStr);
 
-    // 2. Acha o jogador
     const playerIndex = room.players.findIndex((p) => p.id === socketId);
     if (playerIndex === -1) return null;
 
     const playerToRemove = room.players[playerIndex];
     const wasItHisTurn = room.turnPlayerId === socketId;
 
-    // 3. REMOVE o jogador e limpa referência
     room.players.splice(playerIndex, 1);
     await redisClient.del(`${KEY_PLAYER_ROOM}${socketId}`);
-
-    // --- LÓGICA DE NEGÓCIO CENTRALIZADA ---
-
-    // A: Sala ficou vazia? Deleta.
     if (room.players.length === 0) {
       await redisClient.del(`${KEY_ROOM}${roomId}`);
-      // Limpa custom themes se quiser
       return null;
     }
 
-    // B: Host saiu? Passa a coroa.
     if (playerToRemove.isHost) {
       room.players[0].isHost = true;
     }
 
-    // C: Jogo estava rolando?
     if (room.gameState === "PLAYING") {
-      // C1: Poucos jogadores -> Encerra
       if (room.players.length < 2) {
         room.gameState = "HOME";
         room.turnPlayerId = "";
         room.gameResults = undefined;
         room.currentRound = 0;
-      }
-      // C2: Era a vez de quem saiu? -> Passa a vez
-      else if (wasItHisTurn) {
-        // Como o array encolheu, o "próximo" é o índice atual.
-        // Se estourar o array, volta pro 0.
+      } else if (wasItHisTurn) {
         let nextIndex = playerIndex;
         if (nextIndex >= room.players.length) {
           nextIndex = 0;
         }
         room.turnPlayerId = room.players[nextIndex].id;
       }
-      // C3: Não era a vez dele? Não faz nada, o jogo segue.
     }
 
-    // 4. Salva no Redis
     await this.saveRoom(room);
     return room;
   },
@@ -207,7 +191,7 @@ export const RoomService = {
       const room: Room = JSON.parse(roomJson);
       const player = room.players.find((p) => p.id === hostId);
       if (!player?.isHost) {
-        throw new Error("Apenas o Host pode adicionar temas.");
+        throw new Error("Only the Host can add themes.");
       }
     }
 
@@ -215,9 +199,9 @@ export const RoomService = {
       (acc, name) => {
         const normalized = name.trim().toUpperCase();
 
-        if (THEMES[normalized]) {
+        if (THEMES[normalized as keyof typeof THEMES]) {
           throw new Error(
-            `O tema "${name}" conflita com um tema existente. Por favor, escolha outro nome.`,
+            `The theme "${name}" conflicts with an existing theme. Please choose another name.`,
           );
         }
         acc[normalized] = customTheme[name];
@@ -227,7 +211,7 @@ export const RoomService = {
     );
 
     if (Object.keys(normalizedTheme).length === 0) {
-      throw new Error("Nenhum tema personalizado fornecido.");
+      throw new Error("No custom themes provided.");
     }
 
     const existingJson = await redisClient.get(`${KEY_CUSTOM_THEMES}${roomId}`);

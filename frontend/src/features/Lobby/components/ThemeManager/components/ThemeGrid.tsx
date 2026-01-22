@@ -25,7 +25,6 @@ export const ThemeGrid = ({
     <div
       style={{ padding: theme.spacing.l, overflowY: "auto", maxHeight: "70vh" }}
     >
-      {/* Botão Gigante de Criar Novo */}
       <div
         onClick={onCreate}
         style={{

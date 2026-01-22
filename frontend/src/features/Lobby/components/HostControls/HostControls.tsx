@@ -8,7 +8,7 @@ interface Props {
   selectedTheme: string;
   maxRounds: number;
   onRoundsChange: (n: number) => void;
-  onOpenManager: () => void; // Nova prop
+  onOpenManager: () => void;
   onStart: () => void;
   canStart: boolean;
 }
@@ -47,7 +47,7 @@ export const HostControls = ({
           gap: theme.spacing.m,
         }}
       >
-        {/* THEME SELECTOR (New Design) */}
+        {/* THEME SELECTOR */}
         <div>
           <label
             style={{

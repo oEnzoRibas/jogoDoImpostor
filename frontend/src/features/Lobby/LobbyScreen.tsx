@@ -16,7 +16,7 @@ const LobbyScreen = () => {
   }
   return (
     <PageContainer>
-      {/* O Novo Modal de Gerenciamento */}
+      {/* Management Modal */}
       {logic.showThemeModal && (
         <ThemeManager
           onClose={() => logic.setShowThemeModal(false)}
@@ -24,24 +24,24 @@ const LobbyScreen = () => {
         />
       )}
 
-      {/* Cabeçalho */}
+      {/* Header */}
       <RoomHeader roomId={logic.room!.id} />
 
-      {/* Lista de Jogadores */}
+      {/* Player List */}
       <PlayerList players={logic.room!.players} myId={logic.me!.id} />
 
-      {/* Painel de Controle (Atualizado) */}
+      {/* Control Panel (Updated) */}
       <HostControls
         isHost={logic.me!.isHost}
         selectedTheme={logic.selectedTheme}
         maxRounds={logic.preferredMaxRounds}
         onRoundsChange={logic.setPreferredMaxRounds}
-        onOpenManager={() => logic.setShowThemeModal(true)} // Abre o Manager
+        onOpenManager={() => logic.setShowThemeModal(true)}
         onStart={logic.handleStartGame}
         canStart={logic.canStart}
       />
 
-      {/* Botão Sair */}
+      {/* Quit Button */}
       <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >

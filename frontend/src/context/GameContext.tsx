@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
-import type { GameState, Room, Player, Theme } from "@jdi/shared/";
+import type { GameState, Room, Player } from "@jdi/shared/";
 import { socketService } from "../services/socket";
 
 interface SecretData {
@@ -110,7 +110,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // --- AÇÕES ---
+  // --- Actions ---
 
   const connect = () => {
     if (!socketService.socket?.connected) socketService.connect();
@@ -137,10 +137,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   };
 
   const startGame = (themeSelectedName: string, maxRounds?: number) => {
-    
     const payload = {
       themeName: themeSelectedName,
-      maxRounds: maxRounds 
+      maxRounds: maxRounds,
     };
 
     console.log("🚀 Starting Game with payload:", payload);

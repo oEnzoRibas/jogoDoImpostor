@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 // Context
 import { GameProvider, useGame } from "./context/GameContext";
 
-// Telas
+// Screens
 import HomeScreen from "./features/Home/HomeScreen";
 import LobbyScreen from "./features/Lobby/LobbyScreen";
 import GameScreen from "./features/Game/GameScreen";

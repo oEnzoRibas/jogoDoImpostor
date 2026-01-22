@@ -1,9 +1,7 @@
 import { useGame } from "../../context/GameContext";
-import { socketService } from "../../services/socket";
 
 // Imports do Design System
 import { PageContainer } from "../../components/Page/PageContainer";
-import { Card } from "../../components/Card/Card";
 import { PrimaryButton } from "../../components/Buttons/PrimaryButton";
 import { theme } from "../../styles/theme";
 import VotingResultsCard from "./VotingResultsCard/VotingResultsCard";

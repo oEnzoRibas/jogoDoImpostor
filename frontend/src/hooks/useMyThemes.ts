@@ -22,12 +22,12 @@ export const useMyThemes = () => {
       return [...filtered, newTheme];
     });
 
-    toast.success("Tema salvo na sua biblioteca!");
+    toast.success("Theme saved to your library!");
   };
 
   const removeThemeFromLibrary = (themeName: string) => {
     setSavedThemes((prev) => prev.filter((t) => t.name !== themeName));
-    toast.success("Tema removido da biblioteca.");
+    toast.success("Theme removed from library.");
   };
 
   return { savedThemes, saveThemeToLibrary, removeThemeFromLibrary };

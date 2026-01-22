@@ -14,13 +14,11 @@ async function bootstrap() {
 
     const app = express();
 
-    // Define onde está a pasta do Frontend (que o Docker copiou)
     const publicPath = path.join(process.cwd(), "public");
 
-    // Serve os arquivos estáticos (JS, CSS, Imagens)
     app.use(express.static(publicPath));
 
-    // --- Conexão Redis ---
+    // --- Redis ---
     const pubClient = createClient({ url: REDIS_URL });
     pubClient.on("error", (err) => console.error("Redis Error:", err));
     await pubClient.connect();
@@ -30,9 +28,6 @@ async function bootstrap() {
     const httpServer = createServer(app);
     const io = setupSocket(httpServer);
 
-    // 🔥 CORREÇÃO AQUI:
-    // Trocamos "*" (string) por /.*/ (Regex)
-    // Isso resolve o erro "Missing parameter name at index 1"
     app.get(/.*/, (req, res) => {
       res.sendFile(path.join(publicPath, "index.html"));
     });

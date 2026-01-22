@@ -1,20 +1,18 @@
-import { useState } from "react";
-
 import toast from "react-hot-toast";
 
 export const useCopyToClipboard = () => {
   const copy = async (text: string) => {
     if (!navigator.clipboard) {
-      // Fallback simples
+      // Simple fallback
       const textArea = document.createElement("textarea");
       textArea.value = text;
       document.body.appendChild(textArea);
       textArea.select();
       try {
         document.execCommand("copy");
-        toast.success("Copiado!");
+        toast.success("Copied!");
       } catch (err) {
-        toast.error("Erro ao copiar.");
+        toast.error("Error copying.");
       }
       document.body.removeChild(textArea);
       return;
@@ -22,10 +20,10 @@ export const useCopyToClipboard = () => {
 
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Copiado!");
+      toast.success("Copied!");
     } catch (error) {
-      console.error("Falha ao copiar", error);
-      toast.error("Erro ao copiar.");
+      console.error("Error copying", error);
+      toast.error("Error copying.");
     }
   };
 

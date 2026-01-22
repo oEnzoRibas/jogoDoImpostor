@@ -1,7 +1,7 @@
 const DEFAULT_MAX_ROUNDS = 2;
 
 const ROOM_TTL = 60 * 30; // 30 minutes
-const PLAYER_TTL = 60 * 60 * 30; // 30 hours
+const PLAYER_TTL = 60 * 30; // 30 minutes
 
 const KEY_ROOM = "room:";
 const KEY_PLAYER_ROOM = "player_room:";

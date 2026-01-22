@@ -97,7 +97,7 @@ const WordsBalloon = (props: Props) => {
       ) : (
         <span style={{ fontSize: "20px", lineHeight: "1" }}>💬</span>
       )}
-      {/* Triângulo do balão */}
+      {/* Triangle*/}
       <div
         style={{
           position: "absolute",

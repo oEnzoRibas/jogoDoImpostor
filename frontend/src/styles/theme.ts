@@ -1,10 +1,10 @@
 export const theme = {
   colors: {
-    background: "#121212", // Fundo geral (quase preto)
-    surface: "#1e1e1e", // Cartões e modais
-    primary: "#22c55e", // Verde (Ações positivas, Inocentes)
-    secondary: "#ef4444", // Vermelho (Impostor, Perigo, Votar)
-    accent: "#fbbf24", // Amarelo (Turno atual, Destaque)
+    background: "#121212", // General background (almost black)
+    surface: "#1e1e1e", // Cards and modals
+    primary: "#22c55e", // Green (Positive actions, Innocents)
+    secondary: "#ef4444", // Red (Impostor, Danger, Voting)
+    accent: "#fbbf24", // Yellow (Spotlight, Highlights)
     text: {
       primary: "#ffffff",
       secondary: "#a1a1aa",

@@ -1,10 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "../../components/Buttons/PrimaryButton";
 import { theme } from "../../styles/theme";
 
 export const NotFoundScreen = () => {
-  const navigate = useNavigate();
-
   return (
     <div
       style={{
@@ -22,7 +19,6 @@ export const NotFoundScreen = () => {
         overflow: "hidden",
       }}
     >
-      {/* Elemento de Fundo Decorativo (Estrelas ou Ruído) */}
       <div
         style={{
           position: "absolute",
@@ -46,7 +42,6 @@ export const NotFoundScreen = () => {
           gap: theme.spacing.l,
         }}
       >
-        {/* Ícone Animado */}
         <div
           style={{
             fontSize: "80px",

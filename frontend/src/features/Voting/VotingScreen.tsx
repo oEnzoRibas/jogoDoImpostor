@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useGame } from "../../context/GameContext";
 import { socketService } from "../../services/socket";
 
-// Imports do Design System
 import { PageContainer } from "../../components/Page/PageContainer";
 import ConfirmVoteButton from "./ConfirmVoteButton/ConfirmVoteButton";
 import VotingHeader from "./VotingHeader/VotingHeader";

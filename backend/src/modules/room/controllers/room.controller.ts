@@ -1,10 +1,7 @@
 import { Socket, Server as SocketIOServer } from "socket.io";
 import { RoomService } from "../services/room.service.js";
-import { Player } from "@jdi/shared";
-import { DEFAULT_MAX_ROUNDS } from "@jdi/shared/src/constants.js";
 import { CreateRoomPayload } from "../payloads/CreateRoomPayload.js";
 import { JoinRoomPayload } from "../payloads/JoinRoomPayload.js";
-import { StartGamePayload } from "../../game/payloads/StartGamePayload.js";
 
 export const RoomController = {
   async createRoom(

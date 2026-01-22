@@ -2,7 +2,7 @@ import { theme } from "../../../../../styles/theme";
 
 interface Props {
   title: string;
-  icon?: string; // <--- Nova prop
+  icon?: string;
   count?: number;
   preview?: string[];
   isCustom?: boolean;
@@ -21,7 +21,6 @@ export const ThemeCard = ({
   onEdit,
   onDelete,
 }: Props) => {
-  // Ícone padrão caso venha undefined
   const displayIcon = icon || "🎲";
 
   return (
@@ -59,7 +58,6 @@ export const ThemeCard = ({
           : theme.colors.border;
       }}
     >
-      {/* --- CONTEÚDO SUPERIOR --- */}
       <div
         style={{
           display: "flex",
@@ -68,7 +66,7 @@ export const ThemeCard = ({
           flex: 1,
         }}
       >
-        {/* Cabeçalho */}
+        {/* --- Header --- */}
         <div
           style={{
             display: "flex",
@@ -108,9 +106,8 @@ export const ThemeCard = ({
           )}
         </div>
 
-        {/* --- CORPO DO CARD --- */}
+        {/* --- BODY OF THE CARD --- */}
         {isCustom ? (
-          // Custom: Mostra Preview de palavras
           preview && (
             <p
               style={{
@@ -130,7 +127,6 @@ export const ThemeCard = ({
             </p>
           )
         ) : (
-          // Padrão: Mostra o Ícone vindo da Prop
           <div
             style={{
               flex: 1,
@@ -145,7 +141,7 @@ export const ThemeCard = ({
         )}
       </div>
 
-      {/* --- RODAPÉ --- */}
+      {/* --- FOOTER --- */}
       <div
         style={{
           display: "flex",
@@ -155,7 +151,7 @@ export const ThemeCard = ({
         }}
       >
         <span style={{ fontSize: "10px", color: theme.colors.text.disabled }}>
-          {count ? `${count} palavras` : "Default"}
+          {count ? `${count} words` : "Default"}
         </span>
 
         {isCustom && (
@@ -165,7 +161,7 @@ export const ThemeCard = ({
                 e.stopPropagation();
                 onEdit?.();
               }}
-              title="Editar"
+              title="Edit"
               style={{
                 background: "none",
                 border: "none",
@@ -178,7 +174,7 @@ export const ThemeCard = ({
             </button>
             <button
               onClick={onDelete}
-              title="Excluir"
+              title="Delete"
               style={{
                 background: "none",
                 border: "none",
